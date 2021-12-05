@@ -121,7 +121,7 @@ class LengthRegulator(nn.Module):
         res = []
         if self.training:
             lengths = true_durations
-        lengths = lengths.cpu().round().int()
+        lengths = lengths.cpu().round().int().to('cuda')
 
         for i in range(x.shape[0]):
             res.append(torch.repeat_interleave(x[i], lengths[i], 0))
