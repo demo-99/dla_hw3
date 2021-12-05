@@ -17,7 +17,7 @@ from dataset import LJSpeechDataset, LJSpeechCollator
 from featurizer import MelSpectrogram, MelSpectrogramConfig
 from utils import plot_spectrogram_to_buf
 from vocoder import Vocoder
-from wandb import WanDBWriter
+from writer import WanDBWriter
 
 
 @dataclass
