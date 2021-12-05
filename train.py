@@ -65,14 +65,14 @@ for e in range(NUM_EPOCHS):
     loss_iter = np.array([])
     for i, batch in tqdm(enumerate(dataloader)):
         batch.durations = aligner(
-            batch.waveform.to('cuda'), batch.waveforn_length, batch.transcript
+            batch.waveform.to('cuda'), batch.waveform_length, batch.transcript
         )
         melspec = featurizer(batch.waveform)
         melspec_length = melspec.size(-1) - (melspec == -11.5129251)[:, 0, :].sum(dim=-1)
 
         aligned = aligner(
             batch.waveform.to('cuda'),
-            batch.waveforn_length.to('cuda'),
+            batch.waveform_length.to('cuda'),
             batch.transcript
         ) * melspec_length.unsqueeze(-1)
 
