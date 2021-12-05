@@ -56,9 +56,7 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 200, 0.5)
 
 tokenizer = torchaudio.pipelines.TACOTRON2_GRIFFINLIM_CHAR_LJSPEECH.get_text_processor()
 
-val_batch = torch.Tensor([
-    tokenizer(transcript) for transcript in VALIDATION_TRANSCRIPTS
-]).to('cuda')
+val_batch = tokenizer(VALIDATION_TRANSCRIPTS)[0].to('cuda')
 
 loss_log = []
 for e in range(NUM_EPOCHS):
@@ -103,6 +101,7 @@ for e in range(NUM_EPOCHS):
 
         if i % 100 == 99:
             writer.set_step(e * len(dataloader) + i)
+            print('train loss: {}'.format(loss_iter[i-99:].mean()))
             writer.add_scalar('learning rate', scheduler.get_last_lr()[0])
             writer.add_scalar('train loss', loss_iter[i-99:].mean())
         scheduler.step()
