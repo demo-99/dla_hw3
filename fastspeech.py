@@ -122,10 +122,10 @@ class LengthRegulator(nn.Module):
         if self.training:
             lengths = true_durations
         lengths = lengths.round().int().to('cuda')
-        print(lengths.size(), x.size())
 
+        min_len = min(lengths.size(1), x.size(1))
         for i in range(x.shape[0]):
-            res.append(torch.repeat_interleave(x[i], lengths[i], 0))
+            res.append(torch.repeat_interleave(x[i, :min_len], lengths[i, :min_len], 0))
         res = pad_sequence(res, batch_first=True)
         return res.to('cuda'), log_lengths
 
