@@ -51,7 +51,7 @@ model = FastSpeech(
 ).to('cuda')
 
 loss_fn = nn.MSELoss()
-optimizer = torch.optim.Adam(params=model.parameters(), lr=3e-4, betas=(.9, .98), eps=1e-9)
+optimizer = torch.optim.AdamW(params=model.parameters(), lr=1e-4, betas=(.9, .98), eps=1e-9)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 200, 0.5)
 
 tokenizer = torchaudio.pipelines.TACOTRON2_GRIFFINLIM_CHAR_LJSPEECH.get_text_processor()

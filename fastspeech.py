@@ -117,10 +117,11 @@ class LengthRegulator(nn.Module):
 
     def forward(self, x, true_durations=None):
         log_lengths = self.dp(x).squeeze(-1) * self.alpha
-        lengths = log_lengths.detach().exp().cpu().int().numpy()
+        lengths = log_lengths.detach().exp()
         res = []
         if self.training:
-            lengths = true_durations.cpu().int().numpy()
+            lengths = true_durations
+        lengths = lengths.cpu().round().int().numpy()
 
         for i in range(x.shape[0]):
             res.append(torch.repeat_interleave(x[i], lengths[i], 0))
