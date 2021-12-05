@@ -68,14 +68,14 @@ for e in range(NUM_EPOCHS):
     model.train()
     loss_iter = np.array([])
     for i, batch in tqdm(enumerate(dataloader)):
-        melspec = featurizer(batch.waveform)
+        melspec = featurizer(batch.waveform).to('cuda')
         melspec_length = melspec.size(-1) - (melspec == -11.5129251)[:, 0, :].sum(dim=-1)
 
         batch.durations = aligner(
             batch.waveform.to('cuda'),
             batch.waveform_length.to('cuda'),
             batch.transcript
-        ) * melspec_length.unsqueeze(-1)
+        ).to('cuda') * melspec_length.unsqueeze(-1)
 
         optimizer.zero_grad()
 
