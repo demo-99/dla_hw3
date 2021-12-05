@@ -28,8 +28,8 @@ class ModelConfig:
     n_head: int = 12
 
 
-NUM_EPOCHS = 10
-BATCH_SIZE = 16
+NUM_EPOCHS = 15
+BATCH_SIZE = 20
 VALIDATION_TRANSCRIPTS = [
     'A defibrillator is a device that gives a high energy electric shock to the heart of someone who is in cardiac arrest',
     'Massachusetts Institute of Technology may be best known for its math, science and engineering education',
@@ -61,7 +61,6 @@ val_batch = tokenizer(VALIDATION_TRANSCRIPTS)[0].to('cuda')
 loss_log = []
 for e in range(NUM_EPOCHS):
     model.train()
-    writer.add_scalar('epoch', e)
     loss_iter = np.array([])
     for i, batch in tqdm(enumerate(dataloader)):
         batch.durations = aligner(
@@ -119,4 +118,4 @@ for e in range(NUM_EPOCHS):
             writer.add_image("Waveform for '{}'".format(t), ToTensor()(image))
             writer.add_audio("Audio for '{}'".format(t), audio, MelSpectrogramConfig.sr)
 
-torch.save(model.state_dict(), 'fastspeech_checkpoint')
+    torch.save(model.state_dict(), 'fastspeech_checkpoint')
