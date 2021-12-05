@@ -2,6 +2,7 @@ import math
 import torch
 import torch.nn.functional as F
 from torch import nn
+from torch.nn.utils.rnn import pad_sequence
 
 
 class MultiHeadAttention(nn.Module):
@@ -34,7 +35,7 @@ class MultiHeadAttention(nn.Module):
 
 
 class FFTBlock(nn.Module):
-    def __init__(self, hidden_size, n_head, conv_hidden_size=1536):
+    def __init__(self, hidden_size, n_head, conv_hidden_size):
         super(FFTBlock, self).__init__()
         self.norm1 = nn.LayerNorm(hidden_size)
         self.self_attn = MultiHeadAttention(hidden_size, n_head)
@@ -90,10 +91,10 @@ class DurationPredictor(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(DurationPredictor, self).__init__()
         self.layers = nn.Sequential(
-            nn.Conv1d(input_size, hidden_size, kernel_size=5, padding='same'),
+            nn.Conv1d(input_size, hidden_size, kernel_size=3, padding='same'),
             nn.LayerNorm(hidden_size),
             nn.ReLU(),
-            nn.Conv1d(hidden_size, hidden_size, kernel_size=11, padding='same'),
+            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding='same'),
             nn.LayerNorm(hidden_size),
             nn.ReLU(),
             nn.Linear(hidden_size, 1),
@@ -116,44 +117,29 @@ class LengthRegulator(nn.Module):
 
     def forward(self, x, true_durations=None):
         log_lengths = self.dp(x).squeeze(-1) * self.alpha
-        lengths = log_lengths.detach().exp().cpu().numpy()
+        lengths = log_lengths.detach().exp().cpu().int.numpy()
+        res = []
         if self.training:
-            lengths = true_durations.cpu().numpy()
-        res = None
-        for b in range(x.size(0)):
-            res_b = None
-            for i in range(x.size(1)):
-                for _ in range(lengths[b, i].round().astype(int)):
-                    if res_b is None:
-                        res_b = torch.tensor(x[b, i]).unsqueeze(0)
-                    else:
-                        res_b = torch.cat((res_b, x[b, i].unsqueeze(0)), dim=0)
-            if res is None:
-                res = res_b.unsqueeze(0)
-            else:
-                pad_sz = max(res.size(1), x[b].size(0))
-                res = torch.cat(
-                    (
-                        F.pad(res, (0, 0, 0, pad_sz - res.size(1))),
-                        F.pad(x[b], (0, 0, 0, pad_sz - x[b].size(0))).unsqueeze(0),
-                    ),
-                    dim=0,
-                )
+            lengths = true_durations.cpu().int.numpy()
+
+        for i in range(x.shape[0]):
+            res.append(torch.repeat_interleave(x[i], lengths[i], 0))
+        res = pad_sequence(res, batch_first=True)
         return res.to('cuda'), log_lengths
 
 
 class FastSpeech(nn.Module):
-    def __init__(self, out_size, phoneme_vocab_size, hidden_size, n_head):
+    def __init__(self, out_size, phoneme_vocab_size, hidden_size, n_head, fft_hidden_size=1536):
         super(FastSpeech, self).__init__()
         self.positional_encoding1 = PositionalEncoding(hidden_size)
         self.phoneme_embed = PhonemeEmbedding(phoneme_vocab_size, hidden_size)
         self.fft1 = nn.Sequential(
-            *[FFTBlock(hidden_size, n_head) for _ in range(6)]
+            *[FFTBlock(hidden_size, n_head, fft_hidden_size) for _ in range(6)]
         )
         self.len_reg = LengthRegulator(hidden_size, hidden_size)
         self.positional_encoding2 = PositionalEncoding(hidden_size)
         self.fft2 = nn.Sequential(
-            *[FFTBlock(hidden_size, n_head) for _ in range(6)]
+            *[FFTBlock(hidden_size, n_head, fft_hidden_size) for _ in range(6)]
         )
         self.fc = nn.Linear(hidden_size, out_size)
 

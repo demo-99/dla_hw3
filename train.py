@@ -25,11 +25,11 @@ class ModelConfig:
     out_size: int = 80
     phoneme_vocab_size: int = 51
     hidden_size: int = 384
-    n_head: int = 12
+    n_head: int = 2
 
 
 NUM_EPOCHS = 15
-BATCH_SIZE = 20
+BATCH_SIZE = 32
 VALIDATION_TRANSCRIPTS = [
     'A defibrillator is a device that gives a high energy electric shock to the heart of someone who is in cardiac arrest',
     'Massachusetts Institute of Technology may be best known for its math, science and engineering education',
