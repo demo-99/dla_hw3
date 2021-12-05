@@ -107,15 +107,14 @@ for e in range(NUM_EPOCHS):
         scheduler.step()
     loss_iter = loss_iter.mean()
     loss_log.append(loss_iter.mean())
-    model.eval()
-    generated_waves = vocoder.inference(model(val_batch, None)[0]).cpu()
+    with torch.no_grad():
+        model.eval()
+        generated_waves = vocoder.inference(model(val_batch, None)[0]).cpu()
 
-    for name, p in model.named_parameters():
-        writer.add_histogram(name, p, bins="auto")
+        for name, p in model.named_parameters():
+            writer.add_histogram(name, p, bins="auto")
 
-    writer.add_text(f"predictions", "< < < < > > > >".join(VALIDATION_TRANSCRIPTS))
-
-    for audio, t in zip(generated_waves, VALIDATION_TRANSCRIPTS):
-        image = PIL.Image.open(plot_spectrogram_to_buf(audio))
-        writer.add_image("Waveform for '{}'".format(t), ToTensor()(image))
-        writer.add_audio("Audio for '{}'".format(t), audio, MelSpectrogramConfig.sr)
+        for audio, t in zip(generated_waves, VALIDATION_TRANSCRIPTS):
+            image = PIL.Image.open(plot_spectrogram_to_buf(audio))
+            writer.add_image("Waveform for '{}'".format(t), ToTensor()(image))
+            writer.add_audio("Audio for '{}'".format(t), audio, MelSpectrogramConfig.sr)
