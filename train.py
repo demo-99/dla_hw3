@@ -29,7 +29,7 @@ class ModelConfig:
 
 
 NUM_EPOCHS = 10
-BATCH_SIZE = 32
+BATCH_SIZE = 24
 VALIDATION_TRANSCRIPTS = [
     'A defibrillator is a device that gives a high energy electric shock to the heart of someone who is in cardiac arrest',
     'Massachusetts Institute of Technology may be best known for its math, science and engineering education',
