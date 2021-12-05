@@ -121,7 +121,7 @@ class LengthRegulator(nn.Module):
         res = []
         if self.training:
             lengths = true_durations
-        lengths = lengths.round().int()
+        lengths = lengths.round().int().to('cuda')
         print(lengths.size(), x.size())
 
         for i in range(x.shape[0]):
