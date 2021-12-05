@@ -51,7 +51,7 @@ model = FastSpeech(
 ).to('cuda')
 
 try:
-    model.load_state_dict(torch.load('checkpoint'))
+    model.load_state_dict(torch.load('fastspeech_checkpoint'))
 except:
     pass
 
@@ -61,7 +61,7 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 200, 0.5)
 
 tokenizer = torchaudio.pipelines.TACOTRON2_GRIFFINLIM_CHAR_LJSPEECH.get_text_processor()
 
-val_batch = tokenizer(VALIDATION_TRANSCRIPTS)[0].to('fastspeech_checkpoint')
+val_batch = tokenizer(VALIDATION_TRANSCRIPTS)[0].to('cuda')
 
 loss_log = []
 for e in range(NUM_EPOCHS):
