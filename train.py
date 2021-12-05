@@ -68,13 +68,10 @@ for e in range(NUM_EPOCHS):
     model.train()
     loss_iter = np.array([])
     for i, batch in tqdm(enumerate(dataloader)):
-        batch.durations = aligner(
-            batch.waveform.to('cuda'), batch.waveform_length, batch.transcript
-        )
         melspec = featurizer(batch.waveform)
         melspec_length = melspec.size(-1) - (melspec == -11.5129251)[:, 0, :].sum(dim=-1)
 
-        aligned = aligner(
+        batch.durations = aligner(
             batch.waveform.to('cuda'),
             batch.waveform_length.to('cuda'),
             batch.transcript
@@ -82,12 +79,10 @@ for e in range(NUM_EPOCHS):
 
         optimizer.zero_grad()
 
-        pred, lenghts_pred = model(batch.tokens.to('cuda'), aligned)
-        lengths = batch.durations.to('cuda') * \
-                  melspec_length.unsqueeze(1).expand(-1, batch.durations.size(-1)).to('cuda')
-        min_len = min(lengths.size(-1), lenghts_pred.size(-1))
+        pred, lenghts_pred = model(batch.tokens.to('cuda'), batch.durations)
+        min_len = min(batch.durations.size(-1), lenghts_pred.size(-1))
         length_loss = loss_fn(
-            lengths[:, :min_len],
+            batch.durations[:, :min_len],
             lenghts_pred[:, :min_len].exp()
         )
 
@@ -103,11 +98,11 @@ for e in range(NUM_EPOCHS):
         melspec_loss = melspec_loss.detach().cpu().numpy()
         loss_iter = np.append(loss_iter, length_loss + melspec_loss)
 
-        if i % 100 == 99:
+        if i % 10 == 9:
             writer.set_step(e * len(dataloader) + i)
-            print('train loss: {}'.format(loss_iter[i-99:].mean()))
+            print('train loss: {}'.format(loss_iter[i-9:].mean()))
             writer.add_scalar('learning rate', scheduler.get_last_lr()[0])
-            writer.add_scalar('train loss', loss_iter[i-99:].mean())
+            writer.add_scalar('train loss', loss_iter[i-9:].mean())
         scheduler.step()
     loss_iter = loss_iter.mean()
     loss_log.append(loss_iter.mean())
