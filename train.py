@@ -118,3 +118,5 @@ for e in range(NUM_EPOCHS):
             image = PIL.Image.open(plot_spectrogram_to_buf(audio))
             writer.add_image("Waveform for '{}'".format(t), ToTensor()(image))
             writer.add_audio("Audio for '{}'".format(t), audio, MelSpectrogramConfig.sr)
+
+torch.save(model.state_dict(), 'fastspeech_checkpoint')
