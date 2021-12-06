@@ -8,5 +8,8 @@ pip install torch==1.10.0+cu111 torchaudio==0.10.0+cu111 -f https://download.pyt
 git clone https://github.com/NVIDIA/waveglow.git
 
 pip install -r dla_hw3/requirements.txt
+
+pip install gdown
+gdown --id 1PRaPUmsMItTyuiLsXC3bsV48kCzydC7K
 ```
 Запускается обучение и продолжается с `fastspeech_checkpoint`, если checkpoint имеется, командой: `python3 dla_hw3/train.py`
