@@ -10,7 +10,7 @@ git clone https://github.com/NVIDIA/waveglow.git
 pip install -r dla_hw3/requirements.txt
 
 pip install gdown
-gdown --id 1PRaPUmsMItTyuiLsXC3bsV48kCzydC7K
+gdown --id 1nxSCjMyqAUvE1EVf0MMZQ5ObKPxM9MnR
 ```
 Запускается обучение и продолжается с `fastspeech_checkpoint`, если checkpoint имеется, командой: `python3 dla_hw3/train.py`
 
